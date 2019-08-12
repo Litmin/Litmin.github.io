@@ -136,12 +136,12 @@
 
   <article class="post-content">
     <h1>Unity的Temporary RenderTexture</h1>
-    <p>RenderTexture.GetTemporary<br>Allocate a temporary render texture.<br>This function is optimized for when you need a quick RenderTexture to do some temporary calculations. Release it using ReleaseTemporary as soon as you’re done with it, so another call can start reusing it if needed.</p>
-<p>Internally Unity keeps a pool of temporary render textures, so a call to GetTemporary most often just returns an already created one (if the size and format matches). These temporary render textures are actually destroyed when they aren’t used for a couple of frames.</p>
-<p>If you are doing a series of post-processing “blits”, it’s best for performance to get and release a temporary render texture for each blit, instead of getting one or two render textures upfront and reusing them. This is mostly beneficial for mobile (tile-based) and multi-GPU systems: GetTemporary will internally do a DiscardContents call which helps to avoid costly restore operations on the previous render texture contents.</p>
+    <h2 id="RenderTexture-GetTemporary"><a href="#RenderTexture-GetTemporary" class="headerlink" title="RenderTexture.GetTemporary"></a>RenderTexture.GetTemporary</h2><p>Allocate a temporary render texture.<br>This function is optimized for when you need a quick RenderTexture to do some temporary calculations. <strong>Release</strong> it using ReleaseTemporary <strong>as soon as you’re done</strong> with it, <strong>so another call can start reusing it if needed</strong>.</p>
+<p>Internally Unity keeps a <strong>pool of temporary render textures</strong>, so a call to GetTemporary most often just returns an already created one (if the size and format matches). These temporary render textures are actually destroyed when they aren’t used for a couple of frames.</p>
+<p>If you are doing a series of post-processing “blits”, it’s best for performance to get and release a temporary render texture for each blit, instead of getting one or two render textures upfront and reusing them. This is mostly <strong>beneficial for mobile (tile-based) and multi-GPU</strong> systems: GetTemporary will internally do a DiscardContents call which helps to avoid costly restore operations on the previous render texture contents.</p>
 <p>You can not depend on any particular contents of the RenderTexture you get from GetTemporary function. It might be garbage, or it might be cleared to some color, depending on the platform.</p>
-<p>Rendertexture尽量使用GetTemporary来创建，使用完了以后应该马上调用ReleaseTemporary来释放，这样另一处调用才能复用它，Unity内部有一个rendertexture的pool，如果大小和格式一样，GetTemporary就会返回pool里已经创建的RenderTexture，这些RenderTexture会在不用了的几帧之后删除。</p>
-<p>效率更高：在Tile-based GPU和multi-GPU的设备上效率会更高，因为GetTemporary会调用DiscardContents来避免restore操作，不会把RenderTexture之前的数据拷贝到Tile Buffer。</p>
+<p>Rendertexture尽量使用<strong>GetTemporary</strong>来创建，使用完了以后应该马上调用<strong>ReleaseTemporary</strong>来释放，这样另一处调用才能复用它，Unity内部有一个rendertexture的pool，如果大小和格式一样，GetTemporary就会返回pool里已经创建的RenderTexture，这些RenderTexture会在不用了的几帧之后删除。</p>
+<p>效率更高：在Tile-based GPU和multi-GPU的设备上效率会更高，因为GetTemporary会调用<strong>DiscardContents</strong>来避免<strong>restore</strong>操作，不会把RenderTexture之前的数据拷贝到Tile Buffer。</p>
 
   </article>
 </div>
