@@ -7,12 +7,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>
-    Hello World | Litmin的笔记
+    Unity的Temporary RenderTexture | Litmin的笔记
   </title>
   <meta name="description" content="游戏 图形 渲染">
   
   <meta name="keywords" content="
-  
+  Unity Rendering
   ">
   
   <meta name="author" content="Litmin">
@@ -128,27 +128,20 @@
     <i class="fa fa-user-o"></i>
     Litmin
 
-    <span class="post-date float-right" title="{{moment(1565096496833).format('MMM DD, YYYY, h:mm:ss A')}}">
+    <span class="post-date float-right" title="{{moment(1565624389000).format('MMM DD, YYYY, h:mm:ss A')}}">
       <i class="fa fa-pencil-square-o"></i>
-      {{moment(1565096496833).fromNow()}}
+      {{moment(1565624389000).fromNow()}}
     </span>
   </h3>
 
   <article class="post-content">
-    <h1>Hello World</h1>
-    <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+    <h1>Unity的Temporary RenderTexture</h1>
+    <p>RenderTexture.GetTemporary<br>Allocate a temporary render texture.<br>This function is optimized for when you need a quick RenderTexture to do some temporary calculations. Release it using ReleaseTemporary as soon as you’re done with it, so another call can start reusing it if needed.</p>
+<p>Internally Unity keeps a pool of temporary render textures, so a call to GetTemporary most often just returns an already created one (if the size and format matches). These temporary render textures are actually destroyed when they aren’t used for a couple of frames.</p>
+<p>If you are doing a series of post-processing “blits”, it’s best for performance to get and release a temporary render texture for each blit, instead of getting one or two render textures upfront and reusing them. This is mostly beneficial for mobile (tile-based) and multi-GPU systems: GetTemporary will internally do a DiscardContents call which helps to avoid costly restore operations on the previous render texture contents.</p>
+<p>You can not depend on any particular contents of the RenderTexture you get from GetTemporary function. It might be garbage, or it might be cleared to some color, depending on the platform.</p>
+<p>Rendertexture尽量使用GetTemporary来创建，使用完了以后应该马上调用ReleaseTemporary来释放，这样另一处调用才能复用它，Unity内部有一个rendertexture的pool，如果大小和格式一样，GetTemporary就会返回pool里已经创建的RenderTexture，这些RenderTexture会在不用了的几帧之后删除。</p>
+<p>效率更高：在Tile-based GPU和multi-GPU的设备上效率会更高，因为GetTemporary会调用DiscardContents来避免restore操作，不会把RenderTexture之前的数据拷贝到Tile Buffer。</p>
 
   </article>
 </div>
