@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="">
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>
+    xBR过滤和像素风游戏渲染 | Litmin的笔记
+  </title>
+  <meta name="description" content="游戏 图形 渲染">
+  
+  <meta name="keywords" content="
+  
+  ">
+  
+  <meta name="author" content="Litmin">
+
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="theme-color" content="#1e2327">
+  <link rel="apple-touch-icon" href="https://github.githubassets.com/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://github.githubassets.com/apple-touch-icon-180x180.png">
+
+  <link rel="icon" type="image/x-icon" href="./img/yoshi.png">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+
+  
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/vue/1.0.25-csp/vue.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>
+</head>
+
+<body id="replica-app">
+
+<nav class="navbar-wrapper">
+  <div class="navbar">
+    <div class="container clearfix">
+      <a href="/" class="navbar-logo"><i class="fa fa-github"></i></a>
+
+      <div class="navbar-search float-left desktop-only">
+        <div class="navbar-search-form">
+          <label for="gsc-i-id1">This website</label>
+          <div id="google-search">
+            <gcse:search></gcse:search>
+          </div>
+        </div>
+      </div>
+
+      <ul class="navbar-nav float-left">
+        
+        <li><a href="/archives">Archives</a></li>
+        
+        
+        <li><a href="/categories">Categories</a></li>
+        
+        
+        <li><a href="/tags">Tags</a></li>
+        
+        
+        <li class="desktop-only"><a href="/atom.xml" target="_blank">RSS</a></li>
+        
+      </ul>
+
+      <ul class="navbar-nav user-nav float-right desktop-only">
+        <li class="user-nav-notification">
+          <a><span class="user-nav-unread"></span><i class="fa fa-bell"></i></a>
+        </li>
+        <li>
+          <a><i class="fa fa-plus"></i> <i class="fa fa-caret-down"></i></a>
+        </li>
+        <li class="user-nav-logo">
+          <a><img src="./img/yoshi2.png"> <i class="fa fa-caret-down"></i></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+  <header class="header-wrapper desktop-only">
+  <div class="container header-site-detail">
+    <ul class="header-toolbar">
+      <li class="clearfix">
+        <a href="/archives" class="header-toolbar-left"><i
+                  class="fa fa-file-text"></i> Posts </a>
+        <a href="/archives"
+           class="header-toolbar-right"> 3 </a>
+      </li>
+      <li>
+        <a href="/tags" class="header-toolbar-left"><i
+                  class="fa fa-tags"></i> Tags </a>
+        <a href="/tags"
+           class="header-toolbar-right"> 2 </a>
+      </li>
+      <li>
+        <a href="/categories" class="header-toolbar-left"><i
+                  class="fa fa-folder-open"></i> Categories </a>
+        <a href="/categories"
+           class="header-toolbar-right"> 1 </a>
+      </li>
+    </ul>
+    <h2 class="header-title">
+      <i class="fa fa-book text-muted"></i>
+      <a href="/">Litmin的笔记</a>
+      
+      
+    </h2>
+  </div>
+
+  <div class="container">
+    <div class="header-tab-wrapper clearfix">
+      <span class="header-tab header-tab-selected"><i class="fa fa-thumbs-o-up"></i> Like</span>
+      <span class="header-tab"><i class="fa fa-share-alt"></i> Share</span>
+      <span class="header-tab"><i class="fa fa-comments-o"></i> Discussion</span>
+      <span class="header-tab"><i class="fa fa-bookmark-o"></i> Bookmark </span>
+      <span class="header-tab"><i class="fa fa-smile-o"></i> Smile <i class="fa fa-caret-down"></i></span>
+    </div>
+  </div>
+</header>
+
+
+<div class="post-container container">
+  <h3>
+    <i class="fa fa-user-o"></i>
+    Litmin
+
+    <span class="post-date float-right" title="{{moment(1565679252000).format('MMM DD, YYYY, h:mm:ss A')}}">
+      <i class="fa fa-pencil-square-o"></i>
+      {{moment(1565679252000).fromNow()}}
+    </span>
+  </h3>
+
+  <article class="post-content">
+    <h1>xBR过滤和像素风游戏渲染</h1>
+    <h2 id="像素风游戏渲染"><a href="#像素风游戏渲染" class="headerlink" title="像素风游戏渲染"></a>像素风游戏渲染</h2><h2 id="Pixel-art-scaling-algorithms"><a href="#Pixel-art-scaling-algorithms" class="headerlink" title="Pixel-art scaling algorithms"></a>Pixel-art scaling algorithms</h2><p><a href="https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms</a><br>    像素风格的图像缩放算法是一种滤镜，通常用于比较古老的游戏机模拟器中来增强显示效果。像素风图像的缩放属于图像缩放领域。<br>    像素风图像一般分辨率很低，用到的颜色数较少，已经有好几种算法开发出来用来缩放像素风图像，因为传统的缩放算法没有考虑像素风图像的特定，用特定的算法放大图像，可以提高分辨率，丰富颜色，并且提高清晰度。<br>这些技术大部分用在早期游戏机的模拟器上，许多模拟器要求每秒60帧运行，这就要求这些算法效率足够高，目前2x最常用，同时也有3x，4x，5x，6x。</p>
+<h4 id="EPX"><a href="#EPX" class="headerlink" title="EPX"></a>EPX</h4><p>Eric的Pixel Expansion（EPX）是由Eric Johnston于1992年左右在LucasArts开发的算法，当时将SCUMM引擎游戏从IBM PC（运行320×200×256色）移植到早期彩色Macintosh计算机上 或者说分辨率的两倍。算法如下，根据P像素周围四个像素把P扩展为四个新像素：<br><img src="./Eagle.png" alt="Alt text"><br>后来实现了稍微高效但功能相同的实现（如2001年开发的AdvMAME2×和Scale2×）：<br><img src="./EPX2.png" alt="Alt text"></p>
+<h3 id="Scale3×-AdvMAME3×-and-ScaleFX"><a href="#Scale3×-AdvMAME3×-and-ScaleFX" class="headerlink" title="Scale3×/AdvMAME3× and ScaleFX"></a>Scale3×/AdvMAME3× and ScaleFX</h3><p>AdvMAME3×/Scale3×算法可以当成EPX放大3倍的版本。<br><img src="./Scale3x.png" alt="Alt text"><br>Sp3kyFox开发了一种名为ScaleFX的Scale3X改进版，以及一种名为ScaleFX-Hybrid的Reverse-AA版本</p>
+<h3 id="Eagle"><a href="#Eagle" class="headerlink" title="Eagle"></a>Eagle</h3><p><img src="./Eagle.png" alt="Alt text"></p>
+<h3 id="2×SaI"><a href="#2×SaI" class="headerlink" title="2×SaI"></a>2×SaI</h3><h3 id="Super-2×SaI-and-Super-Eagle"><a href="#Super-2×SaI-and-Super-Eagle" class="headerlink" title="Super 2×SaI and Super Eagle"></a>Super 2×SaI and Super Eagle</h3><h3 id="hqnx-family"><a href="#hqnx-family" class="headerlink" title="hqnx family"></a>hqnx family</h3><p>Maxim Stepin的hq2X，hq3X和hq4X的缩放倍数分别是2，3，4.每个像素通过和周围八个像素颜色的比较，将将邻居标记为接近和远离，并使用一张预先生成的Lut来找到相应的输出。<br>hqnx早起是为Super Nintendo模拟器ZSNES开发的。bsnes的作者公开发布了一个节省空间的版本。有几个可以和早期xBR效果相当的shader实现：<a href="https://github.com/libretro/common-shaders/tree/master/hqx" target="_blank" rel="noopener">https://github.com/libretro/common-shaders/tree/master/hqx</a></p>
+<h3 id="xBR-family"><a href="#xBR-family" class="headerlink" title="xBR family"></a>xBR family</h3><p>xBR有六种：xBR，xBRZ，xBR-Hybrid，Super xBR，xBR+3D，Super xBR+3D。<br>xBR（“scale by rules”），由Hyllian开发，跟hqX原理很像，都是模式识别，而且如果输入的区域相同会产生相同的结果。然而，它通过使用两阶段插值规则比HQx更进一步，它可以更好地处理更复杂的模式，例如抗锯齿线和曲线。缩放的背景纹理保持原始图像的锐利特征，而不是像HQx（实际上通常是ScaleHQ）那样变得模糊。最新版本的xBR有多个pass，可以更好的保留细节。还有一个跟Reverse-AA结合的版本叫xBR-Hybrid。xBR+3D是有一个3D mask来只过滤2D元素的版本。<br>Zenju的xBRZ是基于xBR的修改版。它是用C++在CPU端实现的。它也用了和xBR一样的模式识别和插值思想，但使用不同的规则来保留图像细节。这使得它可以用来缩放脸部，特别是眼睛中的细节。xBRZ针对多核CPU和64位架构进行了优化，即使在单核CPU上，性能也比hqx高40-60%。它也支持缩放有alpha通道的图像，缩放倍数为2-6倍。<br>Super xBR是Hyllian在2015年开发的。它以非线性的方式结合律已知的线性过滤和xBR的边缘检测规则。它使用了两个pass而且只能放大两倍。</p>
+<p>DNF的画质提升就是使用的xBR算法中的lv2-fast.<br><img src="./DNFSetting.png" alt="Alt text"><br><img src="./DNFShaderFile.png" alt="Alt text"><br><img src="./BeforexBR-jianshi.png" alt="xBR"><br><img src="./AfterxBR-jianshi.png" alt="Alt text"></p>
+
+  </article>
+</div>
+
+
+    
+
+
+
+
+</div>
+
+<div class="footer-wrapper container">
+  <footer class="footer clearfix">
+    <div class="clearfix">
+    <a href="https://litmin.github.io" class="footer-logo">
+      <i class="fa fa-github"></i>
+    </a>
+    <ul class="footer-social-link">
+      <li>© 2019 Litmin</li>
+      <li><a href="https://litmin.github.io">Home</a></li>
+      
+      <li><a href="https://github.com/Litmin">Github</a></li>
+      
+      <li><a href="http://weibo.com/206663121">Weibo</a></li>
+      
+    </ul>
+    <div class="footer-theme-info">
+      Theme <a href="//github.com/sabrinaluo/hexo-theme-replica">Replica</a>
+      by <a href="//github.com/sabrinaluo">Hiitea</a> ❤ Powered by Hexo
+    </div>
+    </div>
+    
+  </footer>
+</div>
+
+
+
+
+<script src="/js/main.js"></script>
+
+</body>
+</html>
