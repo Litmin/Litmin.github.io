@@ -136,9 +136,12 @@
 
   <article class="post-content">
     <h1>xBR过滤和像素风游戏渲染</h1>
-    <h2 id="像素风游戏渲染"><a href="#像素风游戏渲染" class="headerlink" title="像素风游戏渲染"></a>像素风游戏渲染</h2><p>使像素风游戏好看的秘诀就是<strong>让你的Sprite的一个像素渲染到屏幕的一个像素或者其他的整数个像素</strong>。实现这一目的的诀窍就是调整Camera的<strong>Orthographic Size</strong>。<br>为啥需要这样呢， 如果不对齐就会出现这样的现象：<br><img src="./mogumoving.gif" alt="Alt text"><br>这些格子表示屏幕上一个一个的像素，我在这些格子上放了一个移动的蘑菇，每个<strong>格子中心的点</strong>代表<strong>这个像素的采样点</strong>。因为我们使用的是<strong>Nearest-Neighbor/Point Filtering，这个点就是采样一个纹理时唯一关注的东西</strong>。当新的颜色的边缘穿过这个点时，这个像素就会马上改变颜色。</p>
+    <h2 id="像素风游戏渲染"><a href="#像素风游戏渲染" class="headerlink" title="像素风游戏渲染"></a>像素风游戏渲染</h2><p>使像素风游戏好看的秘诀就是<strong>让你的Sprite的一个像素渲染到屏幕的一个像素或者其他的整数个像素</strong>。实现这一目的的诀窍就是调整Camera的<strong>Orthographic Size</strong>。<br>正交相机的orthographic size就是<strong>垂直方向上显示区域是几个unit</strong>，即Unity中单位长度, 决定了在垂直方向上一个unit能显示多少个像素。在一个1080的屏幕上，camera的orthographic size是5，那一个unit能显示<strong>108个像素（1080 / (5 * 2)）</strong>。如果Sprite的<strong>Pixels Per Unit</strong>刚好是<strong>108</strong>，那渲染效果就是正确。Orthographic size定义的是从屏幕中心到顶部，所以乘了2.</p>
+<p>为啥需要这样呢， 如果不对齐就会出现这样的现象：<br><img src="./mogumoving.gif" alt="Alt text"><br>这些格子表示屏幕上一个一个的像素，我在这些格子上放了一个移动的蘑菇，每个<strong>格子中心的点</strong>代表<strong>这个像素的采样点</strong>。因为我们使用的是<strong>Nearest-Neighbor/Point Filtering，这个点就是采样一个纹理时唯一关注的东西</strong>。当新的颜色的边缘穿过这个点时，这个像素就会马上改变颜色。</p>
 <p>当源纹素网格跟输出网格对不齐时就会出现问题。上面的粒子中，蘑菇的图片是<strong>16x16</strong>，但是我把它缩放了一下，让它占<strong>17x17。这就意味着在每一帧的某个位置，一个像素重复了</strong>。当我们移动蘑菇时，这个重复的位置还会变化。</p>
-<p>因为每个纹素渲染的时候都比一个像素大了一丢丢，在某个时刻它就会跨国两个相邻像素的采样点，两个采样点都在同一个放大的纹素内，所以两个像素都去找最近的纹素，这样这个纹素就输出在了屏幕上的两个地方。</p>
+<p>因为每个纹素渲染的时候都比一个像素大了一丢丢，在某个时刻它就会跨国两个相邻像素的采样点，两个采样点都在同一个放大的纹素内，所以两个像素都去找最近的纹素，这样这个纹素就输出在了屏幕上的两个地方。<br><img src="./moguidle.png" alt="Alt text"><br><em>红框部分为一个纹素跨过了两个采样点</em><br><img src="./MoguRight.gif" alt="Alt text"><br><em>像素匹配的蘑菇</em><br><img src="./MoguBig.gif" alt="Alt text"><br><em>整数倍放大的蘑菇</em></p>
+<p>在这种情况下，由于只有1/16比例的差异，每个纹素出现在奇怪的地方只有一帧或两帧，然后转移到它相邻的纹素上，产生了一个双倍像素的波纹，看起来像在图像上滑动。</p>
+<p>解决方法就是缩放你的像素图片，让他以整数倍的缩放显示在屏幕上。<br>Mario<del>~</del><br><img src="./mario.gif" alt="Alt text"></p>
 <h2 id="Pixel-art-scaling-algorithms"><a href="#Pixel-art-scaling-algorithms" class="headerlink" title="Pixel-art scaling algorithms"></a>Pixel-art scaling algorithms</h2><p><a href="https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms</a><br>    像素风格的图像缩放算法是一种滤镜，通常用于比较古老的游戏机模拟器中来增强显示效果。像素风图像的缩放属于图像缩放领域。<br>    像素风图像一般分辨率很低，用到的颜色数较少，已经有好几种算法开发出来用来缩放像素风图像，因为传统的缩放算法没有考虑像素风图像的特定，用特定的算法放大图像，可以提高分辨率，丰富颜色，并且提高清晰度。<br>这些技术大部分用在早期游戏机的模拟器上，许多模拟器要求每秒60帧运行，这就要求这些算法效率足够高，目前2x最常用，同时也有3x，4x，5x，6x。</p>
 <h4 id="EPX"><a href="#EPX" class="headerlink" title="EPX"></a>EPX</h4><p>Eric的Pixel Expansion（EPX）是由Eric Johnston于1992年左右在LucasArts开发的算法，当时将SCUMM引擎游戏从IBM PC（运行320×200×256色）移植到早期彩色Macintosh计算机上 或者说分辨率的两倍。算法如下，根据P像素周围四个像素把P扩展为四个新像素：<br><img src="./Eagle.png" alt="Alt text"><br>后来实现了稍微高效但功能相同的实现（如2001年开发的AdvMAME2×和Scale2×）：<br><img src="./EPX2.png" alt="Alt text"></p>
 <h3 id="Scale3×-AdvMAME3×-and-ScaleFX"><a href="#Scale3×-AdvMAME3×-and-ScaleFX" class="headerlink" title="Scale3×/AdvMAME3× and ScaleFX"></a>Scale3×/AdvMAME3× and ScaleFX</h3><p>AdvMAME3×/Scale3×算法可以当成EPX放大3倍的版本。<br><img src="./Scale3x.png" alt="Alt text"><br>Sp3kyFox开发了一种名为ScaleFX的Scale3X改进版，以及一种名为ScaleFX-Hybrid的Reverse-AA版本</p>
@@ -146,7 +149,27 @@
 <h3 id="2×SaI"><a href="#2×SaI" class="headerlink" title="2×SaI"></a>2×SaI</h3><h3 id="Super-2×SaI-and-Super-Eagle"><a href="#Super-2×SaI-and-Super-Eagle" class="headerlink" title="Super 2×SaI and Super Eagle"></a>Super 2×SaI and Super Eagle</h3><h3 id="hqnx-family"><a href="#hqnx-family" class="headerlink" title="hqnx family"></a>hqnx family</h3><p>Maxim Stepin的hq2X，hq3X和hq4X的缩放倍数分别是2，3，4.每个像素通过和周围八个像素颜色的比较，将将邻居标记为接近和远离，并使用一张预先生成的Lut来找到相应的输出。<br>hqnx早起是为Super Nintendo模拟器ZSNES开发的。bsnes的作者公开发布了一个节省空间的版本。有几个可以和早期xBR效果相当的shader实现：<a href="https://github.com/libretro/common-shaders/tree/master/hqx" target="_blank" rel="noopener">https://github.com/libretro/common-shaders/tree/master/hqx</a></p>
 <h3 id="xBR-family"><a href="#xBR-family" class="headerlink" title="xBR family"></a>xBR family</h3><p>xBR有六种：xBR，xBRZ，xBR-Hybrid，Super xBR，xBR+3D，Super xBR+3D。<br>xBR（“scale by rules”），由Hyllian开发，跟hqX原理很像，都是模式识别，而且如果输入的区域相同会产生相同的结果。然而，它通过使用两阶段插值规则比HQx更进一步，它可以更好地处理更复杂的模式，例如抗锯齿线和曲线。缩放的背景纹理保持原始图像的锐利特征，而不是像HQx（实际上通常是ScaleHQ）那样变得模糊。最新版本的xBR有多个pass，可以更好的保留细节。还有一个跟Reverse-AA结合的版本叫xBR-Hybrid。xBR+3D是有一个3D mask来只过滤2D元素的版本。<br>Zenju的xBRZ是基于xBR的修改版。它是用C++在CPU端实现的。它也用了和xBR一样的模式识别和插值思想，但使用不同的规则来保留图像细节。这使得它可以用来缩放脸部，特别是眼睛中的细节。xBRZ针对多核CPU和64位架构进行了优化，即使在单核CPU上，性能也比hqx高40-60%。它也支持缩放有alpha通道的图像，缩放倍数为2-6倍。<br>Super xBR是Hyllian在2015年开发的。它以非线性的方式结合律已知的线性过滤和xBR的边缘检测规则。它使用了两个pass而且只能放大两倍。</p>
 <p>DNF的画质提升就是使用的xBR算法中的lv2-fast.<br><img src="./DNFSetting.png" alt="Alt text"><br><img src="./DNFShaderFile.png" alt="Alt text"><br><img src="./BeforexBR-jianshi.png" alt="xBR"></p>
-<p><img src="./AfterxBR-jianshi.png" alt="Alt text"></p>
+<p><img src="./AfterxBR-jianshi.png" alt="Alt text"><br>如果简单的使用Bilinear过滤，图像会没有锯齿，但是清晰度也会下降：<br><img src="./yoshi-bilinear.png" alt="Alt text"></p>
+<h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><p>游戏中的OrthograohicSize是固定的，所以需要根据OrthographicSize和Sprite的Pixel Per Unit计算出要渲染的RenderTexture的大小来使像素匹配。</p>
+<h4 id="第一版"><a href="#第一版" class="headerlink" title="第一版"></a>第一版</h4><p><img src="./Version1.png" alt="Alt text"></p>
+<ol>
+<li><p>创建一个Camera，场景物体渲染到这个Camera，Camera的Target是一张RenderTexture（xBR-Input），大小由Camera的OrthographicSize和屏幕的宽高比计算出来，FilterMode为Point。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">height = orthoGraphicSize * 100(PPU) * 2;</span><br><span class="line">width = height * aspect;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>xBR-Input作为输入，用xBR算法处理渲染到屏幕上。</p>
+</li>
+</ol>
+<p><strong>Rednertexture</strong>：1张1080RGBA（带深度）<br><strong>Blit</strong>：1次</p>
+<h3 id="第二版-只处理角色"><a href="#第二版-只处理角色" class="headerlink" title="第二版(只处理角色)"></a>第二版(只处理角色)</h3><p>第一版的问题是没有过滤想要过滤的部分，游戏中Camera的Size是2.7，计算出来RT的高就是540，游戏中场景部分是用的比较高的分辨率，这样会把场景部分先缩小又放大，降低清晰度，而且场景部分不是像素风不适合xBR，所有需要只过滤角色部分。<br><img src="./Version2.png" alt="Alt text"></p>
+<ol>
+<li>场景物体渲染到xBR-Input上，xBR-Input由OrthographicSize和宽高比计算出来，再乘个2，如果Size是2.7，计算出来RT的高就是1080。<strong>角色部分写入Stencil</strong>，加上AlphaTest把角色周围一圈标记出来。</li>
+<li>把xBR-Input的Stencil信息渲染到xBR-Stencil上，当时考虑的是<strong>模板测试是在片元着色器计算之后</strong>，而xBR过滤的片元着色器计算非常复杂，这样把模板信息渲染到纹理后，就能在xBR片元着色器最开始判断是不是角色部分，如果不是直接返回xBR-Input的颜色值，省去复杂的计算。</li>
+<li>把xBR-Input缩小一半目的是最后作为xBR过滤的输入放大两倍。讲道理如果不缩小两倍，只要让角色的Sprite边界的像素从偶数开始画，纹素大小设置为小一半的大小，也能满足xBR过滤输入的要求。</li>
+<li>使用xBR-Stencil的信息来决定是渲染场景还是渲染角色，渲染场景就直接显示xBR-Input的颜色，渲染角色就显示处理xBR-Lit后的颜色。</li>
+</ol>
+<p><strong>RenderTexture</strong>：1张1080RGBA（带深度），一张1080单通道，一张540RGBA<br><strong>Blit</strong>：3次</p>
+<h3 id="第三版（优化效率和内存）"><a href="#第三版（优化效率和内存）" class="headerlink" title="第三版（优化效率和内存）"></a>第三版（优化效率和内存）</h3><p>第三版相对于第二版有两个改变，一个是<strong>不把Stencil 信息渲染到纹理</strong>，直接使用Stencil里的信息，因为在现代移动GPU上，如果不在FS里写入深度、模板、使用Alpha Test等，一般都会会使用Early-Z。另一个是在第二版的第④步中，处理角色部分时，如果xBR-Lit跟屏幕大小不是<strong>整数倍缩放</strong>，效果就不好，记住一个原则就是只要用了<strong>邻近过滤就要避免非整数倍缩放</strong>。<br><img src="./Version3.png" alt="Alt text"><br><strong>RenderTexture</strong>：1张1080RGBA(带深度)，一张540RGBA<br><strong>Blit</strong>：3次</p>
+<h3 id="第四版"><a href="#第四版" class="headerlink" title="第四版"></a>第四版</h3><p>第三版可以优化的地方：<br>    1，不把xBR-Input缩小一半，使用<strong>PixelSnap</strong>，让像素匹配小一半的屏幕，然后对xBR-Input过滤时把它当成是小一半的图片，即纹素大小小一半，但是发现round函数不管是在GPU还是在CPU都有误差，目前还没解决。<br>2，使用<strong>Screen.SetResolution</strong>修改<strong>屏幕Buffer</strong>的大小，这样就可以省掉一次Blit操作，在Android平台需要测试<strong>Blit Type</strong>这个设置。</p>
 
   </article>
 </div>
