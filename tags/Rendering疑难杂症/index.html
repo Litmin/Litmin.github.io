@@ -163,13 +163,20 @@
       <ul class="archive-list">
         
         <li class="archive-list-item">
-          <h2><a href="/2019/08/13/xBR过滤和像素风游戏渲染/">xBR过滤和像素风游戏渲染</a></h2>
+          <h2><a href="/2019/08/22/后处理效率和Tile-BasedFrameBuffer/">后处理效率问题和Tile-Based架构下的Frame Buffer</a></h2>
           <p>
-               像素风游戏渲染  使像素风游戏好看的秘诀就是 让你的Sprite的一个像素渲染到屏幕的一个像素或者其他的整数个像素 。实现这一目的的诀窍就是调整Camera的 Orthographic Size 。 正交相机的orthographic size就是 垂直方向上显示区域是几个unit ，即Uni...
+               后处理效率问题和Tile-Based架构下的Frame Buffer  在测试后处理效率的时候发现一个诡异的问题，自己预期的一个应该快的流程反而慢了。 测试环境：Unity2018以及一堆手机 大致流程如下： 
+ 
+ 第一种流程    
+ 第二种流程   
+ 
+ 两种做法的区别是：第一种是把S...
           </p>
           <ul class="tag-list clearfix">
             
-            <li class="tag-list-item"><a href="/tags/Rendering/">Rendering</a></li>
+            <li class="tag-list-item"><a href="/tags/Unity/">Unity</a></li>
+            
+            <li class="tag-list-item"><a href="/tags/Rendering疑难杂症/">Rendering疑难杂症</a></li>
             
           </ul>
           <div class="post-info">
@@ -178,31 +185,8 @@
               <a class="category-link" href="/categories/Rendering/"><i class="fa fa-folder-open"></i> Rendering</a>
               
             </span>
-            <span><i class="fa fa-tag"></i> 1 </span>
-            <span>Published {{moment(1565679252000).fromNow()}}</span>
-          </div>
-        </li>
-        
-        <li class="archive-list-item">
-          <h2><a href="/2019/08/12/Unity的Temporary-RenderTexture/">Unity的Temporary RenderTexture</a></h2>
-          <p>
-               RenderTexture.GetTemporary  Allocate a temporary render texture. This function is optimized for when you need a quick RenderTexture to do some temp...
-          </p>
-          <ul class="tag-list clearfix">
-            
-            <li class="tag-list-item"><a href="/tags/Unity/">Unity</a></li>
-            
-            <li class="tag-list-item"><a href="/tags/Rendering/">Rendering</a></li>
-            
-          </ul>
-          <div class="post-info">
-            <span>
-              
-              <a class="category-link" href="/categories/Unity/"><i class="fa fa-folder-open"></i> Unity</a>
-              
-            </span>
             <span><i class="fa fa-tag"></i> 2 </span>
-            <span>Published {{moment(1565624389000).fromNow()}}</span>
+            <span>Published {{moment(1566466804000).fromNow()}}</span>
           </div>
         </li>
         
