@@ -12,7 +12,7 @@
   <meta name="description" content="游戏 图形 渲染">
   
   <meta name="keywords" content="
-  
+  性能优化,Mali,翻译
   ">
   
   <meta name="author" content="Litmin">
@@ -136,7 +136,23 @@
 
   <article class="post-content">
     <h1>[译]Mali Performance 1: Checking the Pipeline</h1>
-    
+    <p>在这个系列前几篇博客中我介绍了一个ARM Mali “Midgard”GPU系列使用的高级渲染模型。这个系列接下来我会讲解如何使用DS-5 Streamline，一个ARM的系统级Profile工具，来定位你的应用程序没有运行到最佳性能的部分。</p>
+<p>在这篇博客中我们将关注宏观管线中的调试问题，这意味着我们会让GPU一直处于工作，还有一些让管线停止的常见原因。如果你才看这个系列那我推荐你先读一读之前的博客，它介绍了我们这次要探讨的概念。</p>
+<p>Note：我假设你已经在你的平台上启动并运行了DS-5 Streamline。 如果您还没有这样做，社区上有一些教程，以便在各种基于Mali的设备上进行设置。</p>
+<ul>
+<li>Google Nexus 10</li>
+<li>Samsung Galaxy Note 3, or Note 10.1<br>The examples in this blog were captured using DS-5 v5.16.</li>
+</ul>
+<h3 id="What-does-good-content-look-like"><a href="#What-does-good-content-look-like" class="headerlink" title="What does good content look like?"></a>What does good content look like?</h3><p>在我们深入研究性能问题之前，了解我们的目标是什么，以及在Streamline中看起来如何。 根据系统的性能和内容的复杂性，有两种可能的“好”行为。</p>
+<ul>
+<li>一个是GPU的瓶颈</li>
+<li>一个时垂直同步的瓶颈</li>
+</ul>
+<p>这个实验所需的计数器是：</p>
+<ul>
+<li></li>
+</ul>
+
   </article>
 </div>
 
