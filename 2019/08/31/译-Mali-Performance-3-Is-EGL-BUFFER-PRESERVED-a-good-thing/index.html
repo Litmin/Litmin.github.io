@@ -12,7 +12,7 @@
   <meta name="description" content="游戏 图形 渲染">
   
   <meta name="keywords" content="
-  
+  性能优化,Mali,翻译
   ">
   
   <meta name="author" content="Litmin">
@@ -136,7 +136,30 @@
 
   <article class="post-content">
     <h1>[译]Mali Performance 3: Is EGL_BUFFER_PRESERVED a good thing?</h1>
-    
+    <p>本周我分析了用到EGL_BUFFER_PRESERVED的应用程序framebuffer的管理，那你如何确定它是个好东西呢。他是一个在与客户讨论用户界面开发时经常出现的问题，就像图形中的许多东西一样，它的效率在很大程度上取决于你在做什么，所以我希望这个博客能够清楚地表达出来。</p>
+<h3 id="What-is-EGL-BUFFER-PRESERVED"><a href="#What-is-EGL-BUFFER-PRESERVED" class="headerlink" title="What is EGL_BUFFER_PRESERVED?"></a>What is EGL_BUFFER_PRESERVED?</h3><p>正如，我上篇博客描述的那样，<a href="https://community.arm.com/developer/tools-software/graphics/b/blog/posts/mali-performance-2-how-to-correctly-handle-framebuffers" target="_blank" rel="noopener">Mali Performance 2: How to Correctly Handle Framebuffers</a>，正常情况下窗口surface不会从一帧保留到下一帧。Mali驱动程序可以假设帧缓冲区的内容被丢弃，因此它不需要维护颜色，深度或模板缓冲区的任何状态。在EGL定义中默认的EGL_SWAP_BEHAVIOR是EGL_BUFFER_DESTROYED。</p>
+<p>当通过EGL创建一个窗口surface时，可以使用EGL_BUFFER_PRESERVED作为EGL_SWAP_BEHAVIOR的配置来创建。这意味着第N帧的最后的Color数据会作为第N+1帧中Color Buffer的初始颜色。需要注意的是只有Color buffer会被保留；depth和stencil不会被保留，他们的值在每帧的最后都会丢失。</p>
+<h3 id="Great-I-can-render-only-what-changed"><a href="#Great-I-can-render-only-what-changed" class="headerlink" title="Great, I can render only what changed!"></a>Great, I can render only what changed!</h3><p>大多数人常犯的错误是他们相信这种技术允许他们在现有的帧缓冲区上增加少量渲染。如果自上一帧以来屏幕上唯一改变的是时钟递增一秒钟，那么我只需修改任务栏中的时钟，对吧？ 错误！</p>
+<p>请记住，大多数真实系统都运行N缓冲渲染方案，有时是双缓冲的，但越来越常见的是三缓冲。当渲染第N + 1帧时，您追加的内存缓冲区不是颜色缓冲帧N，但可能是帧N-2的内存缓冲区。EGL_BUFFER_PRESERVED不是简单的补丁操作，它会强制要求驱动把包含Color buffer的矩形区域从第N帧渲染到第N+1的tile memory。</p>
+<p>正如我之前的一篇博客中提到的，并且由seanellis的关于<a href="https://community.arm.com/developer/tools-software/graphics/b/blog/posts/killing-pixels---a-new-optimization-for-shading-on-arm-mali-gpus" target="_blank" rel="noopener">Forward Pixel Kill（FPK）</a>的博客所述，Mali GPU系列中最近的一些GPU支持removal of overdrawn fragment，在他们成为GPU的性能消耗之前。如果前一帧的overdrawn部分是不透明的（没有混合，没有片元中的discard），读取回来的overdrawn部分可以被抑制，所以不会有效率和带宽的影响。此外，如果你启用了EGL_BUFFER_PRESERVED，但是发现你想overdraw所有东西，那你可以在这一帧渲染的最开始调用glClear来防止readback发生。</p>
+<h3 id="Is-EGL-BUFFER-PRESERVED-worth-using"><a href="#Is-EGL-BUFFER-PRESERVED-worth-using" class="headerlink" title="Is EGL_BUFFER_PRESERVED worth using?"></a>Is EGL_BUFFER_PRESERVED worth using?</h3><p>因此，你开始思考multi-frame渲染管线中哪些东西跟把整个屏幕的颜色读取回来的需求相关，我得到的下一个问题是“我的UI应用要用EGL_BUFFER_PRESERVED吗？”</p>
+<p>像许多有价值的工程问题一样，答案不是简单的“是”或“不是”，而是更加微妙的“它取决于”。</p>
+<p>EGL_BUFFER_PRESERVED的消耗是加载前一帧的数据以正确的初始颜色填充这一帧。另一种做法是从clear color开始重新渲染。使用EGL_BUFFER_PRESERVED是不是对的取决于这两个东西的开销：</p>
+<ul>
+<li>如果你的UI应用组合多个未压缩的layer，这会大量使用透明，那你用EGL_BUFFER_PRESERVED可能就是明智之选。读取回单个layer的开销比重新使用多个layer和blend生成颜色要低。</li>
+<li>如果你的UI应用过或者2D游戏只有一个layer，从压缩纹理中读取，那EGL_BUFFER_PRESERVED很可能是错误的。读取回上一帧的颜色用的带宽会比重新渲染更昂贵。</li>
+</ul>
+<p>显然并不总是那么明确 - 这两个极端之间存在灰色阴影 - 因此在进行任何分析时都需要小心。如果有疑问，请使用GPU性能计数器来检查在生产平台上运行的实际应用程序的性能，测试开启和关闭EGL_BUFFER_PRESERVED的效率。没有什么比在真实设备中测试您的真实用例更好了。本系列中的其他一些博客提供了有关此类应用程序性能分析的指导，并且我将在接下来的几个月中继续在该系列添加更多资料。</p>
+<p>但是，在执行此类性能实验时，请务必注意，应用程序最好明确使用（或不使用）EGL_BUFFER_PRESERVED; 如果您希望从任一路径中获得最有效的解决方案，通常不会像轻弹EGL配置开关一样简单。</p>
+<p>值得注意的是，在具有支持ARM Framebuffer Compression（AFBC）的显示控制器（如Mali-DP500）和GPU（如Mali-T760）的系统中，EGL_BUFFER_PRESERVED回读的带宽开销可以显着降低，如 回读带宽将是压缩帧缓冲区的带宽，通常比未压缩原始帧小25-50％。</p>
+<h3 id="A-Better-Future"><a href="#A-Better-Future" class="headerlink" title="A Better Future?"></a>A Better Future?</h3><p>EGL_BUFFER_PRESERVED的行为是一个好主意，并且在许多情况下仍然有用，但由于需要插入前一帧数据的全帧回读，因此在N缓冲系统中丢失了它的许多理论优势。</p>
+<p>我们相信，如果应用程序和缓冲区保留方案都可以明确地暴露（并因此可以利用）特定平台上的N缓冲内存模型，那么应用程序 - 特别是用户界面 - 可以显着提高效率。如果应用程序知道系统是双缓冲的，并且它知道当前状态和两帧之前的状态之间的增量，则可以接近仅渲染和合成内存中已更改的区域的架构理想。对于大多数稳态UI，这有可能从根本上降低能耗和内存带宽。</p>
+<h3 id="EGL-KHR-partial-update"><a href="#EGL-KHR-partial-update" class="headerlink" title="EGL_KHR_partial_update"></a>EGL_KHR_partial_update</h3><p>EGL_KHR_partial_update扩展旨在允许应用程序查询系统的N缓冲级别 - 缓冲区时间 - 并使用该信息，以及自上次渲染缓冲区以来应用程序逻辑中已更改的内容的信息，以指定屏幕的一个区域为“dirty rectangles”，必须由GPU渲染。</p>
+<p>此扩展中的 buffer aging功能与EGL_EXT_buffer_age扩展提供的功能非常相似，但对于tile-based渲染而言，它也提供了“dirty rectangles”，这使得我们可以提前知道哪些区块可以完全丢弃，因为它们保证不被修改。如果您可以选择这两个扩展，请使用EGL_KHR_partial_update功能以获得最佳性能; 由于这个原因，Mali驱动程序不会暴露EGL_EXT_buffer_age。</p>
+<h3 id="EGL-KHR-swap-buffers-with-damage"><a href="#EGL-KHR-swap-buffers-with-damage" class="headerlink" title="EGL_KHR_swap_buffers_with_damage"></a>EGL_KHR_swap_buffers_with_damage</h3><p>EGL_KHR_swap_buffers_with_damage扩展为应用程序提供了一种为系统组合过程提供dirty rectangles的方法，使N缓冲合成器和显示控制器也能从客户端呈现从EGL_KHR_partial_update获得的优化中受益。</p>
+<h3 id="Do-I-need-to-use-both-extensions-to-get-full-benefit"><a href="#Do-I-need-to-use-both-extensions-to-get-full-benefit" class="headerlink" title="Do I need to use both extensions to get full benefit?"></a>Do I need to use both extensions to get full benefit?</h3><p>是。 使用EGL_KHR_partial_update优化应用程序使用GPU作为缓冲区生成器呈现的内容; 使用EGL_KHR_swap_buffers_with_damage优化系统合成器必须刷新的内容，以便将有效的输出图像作为缓冲区使用者发送到显示器。 应用程序在每种情况下必须指定的损坏矩形通常是不同的，因此需要两个扩展。</p>
+<h3 id="Tune-In-Next-Time"><a href="#Tune-In-Next-Time" class="headerlink" title="Tune In Next Time"></a>Tune In Next Time</h3><p>这让我结束了对帧缓冲管理的短暂关注，因此下次我们将重新考虑使用Mali和ARM DS-5 Streamline来研究应用程序性能瓶颈和优化。</p>
+
   </article>
 </div>
 
